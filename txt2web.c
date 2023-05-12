@@ -144,10 +144,10 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
 
         while(fgets(line, sizeof(line), f_in)) {
                 /* META */
-                if (str_starts_with(line, "-----") && !in_meta) {
+                if (str_starts_with(line, "-----") && !in_meta && !in_code) {
                         in_meta = true;
                 }
-                else if (str_starts_with(line, "-----")) {
+                else if (str_starts_with(line, "-----") && !in_code) {
                         in_meta = false;
                         fprintf(f_out, "\n</head>\n<body>\n<main>\n");
                         if (strcmp(input_filename, "index") != 0) {
@@ -155,7 +155,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         }
                         continue;
                 }
-                if (in_meta) {
+                if (in_meta && !in_code) {
                         if (str_starts_with(line, "title:")) {
                                 blog_post.title = str_get_value(line, "title:");
                                 fprintf(f_out, "  <title>%s</title>", blog_post.title);
@@ -181,13 +181,13 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         }
                 }
                 /* Images */
-                else if (str_starts_with(line, "@")) {
+                else if (str_starts_with(line, "@") && !in_code) {
                         char* str_img = str_get_value(line, "@");
                         fprintf(f_out, "  <img src='%s'>\n", str_img);
                         free(str_img);
                 }
                 /* headings */
-                else if (str_starts_with(line, "#")) {
+                else if (str_starts_with(line, "#") && !in_code) {
                         int header_level = str_starts_with_count(line, '#');
                         char* str = str_get_value_after_token(line, "#");
                         char* rpl = str_repl_keywords(str, blog_post);
@@ -197,6 +197,8 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                 }
                 /* code blocks */
                 else if (str_starts_with(line, "```") && !in_code) {
+                        if (in_paragraph)
+                                fprintf(f_out, "  </p>\n");
                         fprintf(f_out, "  <code><pre>\n");
                         in_code = true;
                         in_paragraph = false;
@@ -206,7 +208,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         in_code = false;
                 }
                 /* Paragraph tags */
-                else if (in_paragraph && strlen(line) <= 1) {
+                else if (in_paragraph && strlen(line) <= 1 && !in_code) {
                         fprintf(f_out, "  </p>\n");
                         in_paragraph = false;
                 }
@@ -216,12 +218,13 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         in_paragraph = true;
                         free(str);
                 }
-                else {
+                else if (!in_code) {
                         char* str = str_repl_keywords(line, blog_post);
-                        if (in_paragraph)
-                                fprintf(f_out, "    ");
-                        fprintf(f_out, "%s", str);
+                        fprintf(f_out, "    %s", str);
                         free(str);
+                }
+                else {
+                        fprintf(f_out, "%s", line);
                 }
         }
 
