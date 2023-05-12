@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 
 typedef struct {
@@ -17,7 +18,7 @@ typedef struct {
 
 Post txt_to_html(const char* input_filename, const char* output_filename);
 void freePost(Post* post);
-void copy_dir(char* src, char* dest);
+void copy_dir(const char* src, char* dest);
 void remove_dir(const char* dirpath);
 void file_warning(const char* err, const char* filename);
 void parse_date(const char* date_str, time_t* result);
@@ -42,7 +43,6 @@ int main(int argc, char **argv)
         Post index_post;
         int file_count = 0;
         long index_pos;
-        long truncate_pos;
         int i;
         char postdir[512];
         char indexloc[512];
@@ -240,13 +240,12 @@ void freePost(Post* post)
 }
 
 
-void copy_dir(char* src, char* dest)
+void copy_dir(const char* src, char* dest)
 {
         DIR* dir = opendir(src);
         struct dirent* entry;
         char src_path[1024];
         char dest_path[1024];
-        int i;
         struct stat st;
 
         if (dir == NULL)
