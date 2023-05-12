@@ -24,6 +24,11 @@ To generate your website simply enter this command
 `txt2web <build_directory>`
 replacing `<build_directory> with the directory that the website will generate to. Please note, that the build directory will be cleared before building the site, so do not make the mistake of making the build directory the same as the source directory.
 
+## Todo
+- Add formatting for:
+  - links
+  - lists
+
 ## Installation
 ```
 git clone https://github.com/masonarmand/txt2web.git
