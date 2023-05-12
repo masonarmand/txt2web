@@ -381,7 +381,7 @@ void remove_extension(const char* filename, char* output)
                 output[dot - filename] = '\0';
         }
         else {
-                strcpy(output, filename);
+                return;
         }
 }
 
