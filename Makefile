@@ -34,8 +34,8 @@ EXEC = txt2web
 all: build
 
 build:
-	# $(CC) -g $(SOURCES) $(CFLAGS) $(WARNINGS) -o $(EXEC)
-	$(CC) -g $(SOURCES) $(CFLAGS) -o $(EXEC)
+	$(CC) -g $(SOURCES) $(CFLAGS) $(WARNINGS) -o $(EXEC)
+	#$(CC) -g $(SOURCES) $(CFLAGS) -o $(EXEC)
 
 run:
 	./$(EXEC)
