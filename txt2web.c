@@ -262,14 +262,15 @@ void copy_dir(const char* src, char* dest)
 
 
         while ((entry = readdir(dir)) != NULL) {
-                if (strcmp(entry->d_name, ".") == 0
-                   || strcmp(entry->d_name, "..") == 0
-                   || strcmp(entry->d_name, "index") == 0
-                   || strcmp(entry->d_name, dest) == 0)
+                bool is_dir = strcmp(entry->d_name, ".") == 0;
+                bool is_pdir = strcmp(entry->d_name, "..") == 0;
+                bool is_index = strcmp(entry->d_name, "index") == 0;
+                bool is_dest = strcmp(entry->d_name, dest) == 0;
+                bool is_sh = strstr(entry->d_name, ".sh") != NULL;
+                bool is_txt = strstr(entry->d_name, ".txt") != NULL;
+
+                if (is_dir || is_pdir || is_index || is_dest || is_sh || is_txt)
                         continue;
-                if (strstr(entry->d_name, ".txt") != NULL) {
-                        continue;
-                }
 
                 snprintf(src_path, sizeof(src_path), "%s/%s", src, entry->d_name);
                 snprintf(dest_path, sizeof(dest_path), "%s/%s", dest, entry->d_name);
