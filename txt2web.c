@@ -110,7 +110,7 @@ int main(int argc, char **argv)
                 freePost(&files[i]);
         }
 
-        fprintf(index, "  </nav></ul>\n</main>\n</body>\n</html>\n");
+        fprintf(index, "  </ul></nav>\n</main>\n</body>\n</html>\n");
         fclose(index);
         freePost(&index_post);
 
