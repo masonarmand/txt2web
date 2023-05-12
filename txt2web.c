@@ -132,6 +132,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
         FILE* f_out = fopen(output_filename, "w");
         char line[1024];
         bool in_paragraph = false;
+        bool in_code = false;
         bool in_meta = false;
         bool has_tags = false;
         Post blog_post = { 0 };
@@ -194,12 +195,22 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         free(str);
                         free(rpl);
                 }
+                /* code blocks */
+                else if (str_starts_with(line, "```") && !in_code) {
+                        fprintf(f_out, "  <code><pre>\n");
+                        in_code = true;
+                        in_paragraph = false;
+                }
+                else if (str_starts_with(line, "```") && in_code) {
+                        fprintf(f_out, "  </pre></code>\n");
+                        in_code = false;
+                }
                 /* Paragraph tags */
                 else if (in_paragraph && strlen(line) <= 1) {
                         fprintf(f_out, "  </p>\n");
                         in_paragraph = false;
                 }
-                else if (!in_paragraph && strlen(line) > 1) {
+                else if (!in_paragraph && strlen(line) > 1 && !in_code) {
                         char* str = str_repl_keywords(line, blog_post);
                         fprintf(f_out, "\n  <p>\n    %s", str);
                         in_paragraph = true;
@@ -207,7 +218,9 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                 }
                 else {
                         char* str = str_repl_keywords(line, blog_post);
-                        fprintf(f_out, "    %s", str);
+                        if (in_paragraph)
+                                fprintf(f_out, "    ");
+                        fprintf(f_out, "%s", str);
                         free(str);
                 }
         }
