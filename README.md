@@ -28,6 +28,7 @@ replacing `<build_directory> with the directory that the website will generate t
 - Add formatting for:
   - links
   - lists
+- References using `[number]` with bibliography at the end of the page?
 
 ## Installation
 ```
