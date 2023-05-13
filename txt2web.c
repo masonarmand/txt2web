@@ -180,14 +180,24 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                                 free(str_style);
                         }
                 }
+                /* code blocks */
+                else if (in_code) {
+                        if (str_starts_with(line, "```")) {
+                                fprintf(f_out, "</pre></code>\n");
+                                in_code = false;
+                        }
+                        else {
+                                fprintf(f_out, "%s", line);
+                        }
+                }
                 /* Images */
-                else if (str_starts_with(line, "@") && !in_code) {
+                else if (str_starts_with(line, "@")) {
                         char* str_img = str_get_value(line, "@");
                         fprintf(f_out, "  <img src='%s'>\n", str_img);
                         free(str_img);
                 }
                 /* headings */
-                else if (str_starts_with(line, "#") && !in_code) {
+                else if (str_starts_with(line, "#")) {
                         int header_level = str_starts_with_count(line, '#');
                         char* str = str_get_value_after_token(line, "#");
                         char* rpl = str_repl_keywords(str, blog_post);
@@ -195,36 +205,28 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         free(str);
                         free(rpl);
                 }
-                /* code blocks */
-                else if (str_starts_with(line, "```") && !in_code) {
+                else if (str_starts_with(line, "```")) {
                         if (in_paragraph)
                                 fprintf(f_out, "  </p>\n");
                         fprintf(f_out, "<code><pre>\n");
                         in_code = true;
                         in_paragraph = false;
                 }
-                else if (str_starts_with(line, "```") && in_code) {
-                        fprintf(f_out, "</pre></code>\n");
-                        in_code = false;
-                }
                 /* Paragraph tags */
-                else if (in_paragraph && strlen(line) <= 1 && !in_code) {
+                else if (in_paragraph && strlen(line) <= 1) {
                         fprintf(f_out, "  </p>\n");
                         in_paragraph = false;
                 }
-                else if (!in_paragraph && strlen(line) > 1 && !in_code) {
+                else if (!in_paragraph && strlen(line) > 1) {
                         char* str = str_repl_keywords(line, blog_post);
                         fprintf(f_out, "\n  <p>\n    %s", str);
                         in_paragraph = true;
                         free(str);
                 }
-                else if (!in_code) {
+                else {
                         char* str = str_repl_keywords(line, blog_post);
                         fprintf(f_out, "    %s", str);
                         free(str);
-                }
-                else {
-                        fprintf(f_out, "%s", line);
                 }
         }
 
