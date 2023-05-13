@@ -25,6 +25,7 @@ typedef struct {
 } Post;
 
 Post txt_to_html(const char* input_filename, const char* output_filename);
+bool direxists(const char* dir);
 void cleandirname(char* str);
 void free_post(Post* post);
 bool hasperms(const char* dir);
@@ -34,6 +35,7 @@ void file_warning(const char* err, const char* filename);
 void parse_date(const char* date_str, time_t* result);
 int compare_dates(const void* a, const void* b);
 void remove_extension(const char* filename, char* output);
+char* replace_links(char* str);
 char* replace_str(char* str, const char* find, const char* replace);
 bool str_starts_with(const char* str, const char* prefix);
 int str_starts_with_count(const char* str, const char prefix);
@@ -63,6 +65,9 @@ int main(int argc, char **argv)
         }
 
         cleandirname(argv[1]);
+        if (!direxists(argv[1])) {
+                mkdir(argv[1], 0755);
+        }
 
         if (!hasperms(argv[1])) {
                 fprintf(stderr, "Write or read permission not granted for directory: %s\n", argv[1]);
@@ -239,8 +244,10 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                 }
                 else {
                         char* str = str_repl_keywords(line, blog_post);
-                        fprintf(f_out, "    %s", str);
+                        char* rpl = replace_links(str);
+                        fprintf(f_out, "    %s", rpl);
                         free(str);
+                        free(rpl);
                 }
         }
 
@@ -268,6 +275,13 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
         fclose(f_out);
 
         return blog_post;
+}
+
+
+bool direxists(const char* dir)
+{
+        struct stat st = { 0 };
+        return !(stat(dir, &st) == -1);
 }
 
 
@@ -463,6 +477,56 @@ char* replace_str(char* str, const char* find, const char* replace)
         }
         strcpy(tmp, str);
         return result;
+}
+
+
+char* replace_links(char* str)
+{
+        char* cpy = strdup(str);
+        const char* http = "http://";
+        const char* https = "https://";
+        char* start = cpy;
+        char* pos = NULL;
+
+        if (!cpy)
+                return NULL;
+
+        while ((pos = strstr(start, http)) || (pos = strstr(start, https))) {
+                char* end = pos;
+                size_t url_len;
+                size_t rpl_len;
+                char* rpl;
+                char* url;
+                char* new_str;
+                size_t pos_offset = pos - start;
+
+                while (*end && !isspace(*end))
+                        end++;
+                url_len = end - pos;
+                url = malloc(url_len + 1);
+
+                if (!url)
+                        return NULL;
+
+                strncpy(url, pos, url_len);
+                url[url_len] = '\0';
+                rpl_len = strlen("<a href=''></a>") + 2 * url_len + 1;
+                rpl = malloc(rpl_len);
+
+                if (!rpl)
+                        return NULL;
+
+                snprintf(rpl, rpl_len, "<a href='%s'>%s</a>", url, url);
+
+                new_str = replace_str(cpy, url, rpl);
+                free(cpy);
+                cpy = new_str;
+
+                free(url);
+                free(rpl);
+                start = cpy + pos_offset + rpl_len;
+        }
+        return cpy;
 }
 
 
