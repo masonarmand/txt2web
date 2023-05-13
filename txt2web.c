@@ -199,12 +199,12 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                 else if (str_starts_with(line, "```") && !in_code) {
                         if (in_paragraph)
                                 fprintf(f_out, "  </p>\n");
-                        fprintf(f_out, "  <code><pre>\n");
+                        fprintf(f_out, "<code><pre>\n");
                         in_code = true;
                         in_paragraph = false;
                 }
                 else if (str_starts_with(line, "```") && in_code) {
-                        fprintf(f_out, "  </pre></code>\n");
+                        fprintf(f_out, "</pre></code>\n");
                         in_code = false;
                 }
                 /* Paragraph tags */
