@@ -25,7 +25,9 @@ typedef struct {
 } Post;
 
 Post txt_to_html(const char* input_filename, const char* output_filename);
-void freePost(Post* post);
+void cleandirname(char* str);
+void free_post(Post* post);
+bool hasperms(const char* dir);
 void copy_dir(const char* src, char* dest);
 void remove_dir(const char* dirpath);
 void file_warning(const char* err, const char* filename);
@@ -56,13 +58,20 @@ int main(int argc, char **argv)
         char indexloc[512];
 
         if (argc != 2) {
-                fprintf(stderr, "Usage: %s destination_directory/\n", argv[0]);
+                fprintf(stderr, "Usage: %s destination_directory\n", argv[0]);
                 return 0;
+        }
+
+        cleandirname(argv[1]);
+
+        if (!hasperms(argv[1])) {
+                fprintf(stderr, "Write or read permission not granted for directory: %s\n", argv[1]);
+                return 1;
         }
 
         remove_dir(argv[1]);
         printf("Copying files into build directory: %s\n", argv[1]);
-        copy_dir("./", argv[1]);
+        copy_dir(".", argv[1]);
         sprintf(postdir, "%s/posts/", argv[1]);
         sprintf(indexloc, "%s/index.html", argv[1]);
 
@@ -115,12 +124,12 @@ int main(int argc, char **argv)
         fprintf(index, "  <nav><ul>\n");
         for (i = 0; i < file_count; i++) {
                 fprintf(index, "    <li><span class='date'>%s</span> - <a href='posts/%s.html'>%s</a></li>\n", files[i].date_str, files[i].filename, files[i].title);
-                freePost(&files[i]);
+                free_post(&files[i]);
         }
 
         fprintf(index, "  </ul></nav>\n</main>\n</body>\n</html>\n");
         fclose(index);
-        freePost(&index_post);
+        free_post(&index_post);
 
         return 0;
 }
@@ -136,6 +145,11 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
         bool in_meta = false;
         bool has_tags = false;
         Post blog_post = { 0 };
+
+        if (f_in == NULL) {
+                fprintf(stderr, "ERROR: Trying to write to nonexistent file: %s", input_filename);
+                exit(1);
+        }
 
         fprintf(f_out, "<!DOCTYPE html>\n<html lang='en'>\n<head>\n");
         fprintf(f_out, "  <meta charset='UTF-8'>\n");
@@ -257,12 +271,29 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
 }
 
 
-void freePost(Post* post)
+void cleandirname(char* str)
+{
+        size_t len = strlen(str);
+        if (str[len - 1] == '/')
+                str[len - 1] = '\0';
+}
+
+
+void free_post(Post* post)
 {
         free(post->title);
         free(post->description);
         free(post->date_str);
         free(post->filename);
+}
+
+
+bool hasperms(const char* dir)
+{
+        if (access(dir, R_OK | W_OK) == 0)
+                return true;
+        else
+                return false;
 }
 
 
@@ -305,6 +336,8 @@ void copy_dir(const char* src, char* dest)
 
                         char buf[1024];
                         size_t size;
+
+                        printf("Copying file: %s to %s\n", src_path, dest_path);
 
                         while ((size = fread(buf, 1, sizeof(buf), src_file)) > 0) {
                                 fwrite(buf, 1, size, dest_file);
