@@ -35,7 +35,7 @@ void file_warning(const char* err, const char* filename);
 void parse_date(const char* date_str, time_t* result);
 int compare_dates(const void* a, const void* b);
 void remove_extension(const char* filename, char* output);
-char* replace_links(char* str);
+char* replace_links(const char* str);
 char* replace_str(char* str, const char* find, const char* replace);
 bool str_starts_with(const char* str, const char* prefix);
 int str_starts_with_count(const char* str, const char prefix);
@@ -484,24 +484,25 @@ char* replace_str(char* str, const char* find, const char* replace)
 }
 
 
-char* replace_links(char* str)
+char* replace_links(const char* str)
 {
-        char* cpy = strdup(str);
         const char* http = "http://";
         const char* https = "https://";
-        char* start = cpy;
-        char* pos = NULL;
+        const char* start = str;
+        const char* pos = NULL;
+        char* result = malloc(strlen(str) * 3 + strlen("<a href=''></a>") + 1);
+        char* result_pos = result;
 
-        if (!cpy)
+        if (!result)
                 return NULL;
 
         while ((pos = strstr(start, http)) || (pos = strstr(start, https))) {
-                char* end = pos;
-                size_t url_len;
-                size_t rpl_len;
-                char* rpl;
+                const char* end = pos;
                 char* url;
-                char* new_str;
+                size_t url_len;
+
+                memcpy(result_pos, start, pos - start);
+                result_pos += pos - start;
 
                 while (*end && !isspace(*end))
                         end++;
@@ -509,29 +510,20 @@ char* replace_links(char* str)
                 url_len = end - pos;
                 url = malloc(url_len + 1);
 
-                if (!url)
+                if (!url) {
+                        free(result);
                         return NULL;
+                }
 
                 strncpy(url, pos, url_len);
                 url[url_len] = '\0';
-                rpl_len = strlen("<a href=''></a>") + (2 * url_len) + 1;
-                rpl = malloc(rpl_len);
 
-                if (!rpl)
-                        return NULL;
-
-                snprintf(rpl, rpl_len, "<a href='%s'>%s</a>", url, url);
-
-                new_str = replace_str(cpy, url, rpl);
-                free(cpy);
-                cpy = new_str;
-
-                start = pos + (strlen(rpl) - url_len);
-
+                result_pos += sprintf(result_pos, "<a href='%s'>%s</a>", url, url);
                 free(url);
-                free(rpl);
+                start = end;
         }
-        return cpy;
+        strcpy(result_pos, start);
+        return result;
 }
 
 
