@@ -526,7 +526,7 @@ char* replace_links(char* str)
                 free(cpy);
                 cpy = new_str;
 
-                start = pos + (rpl_len - url_len);
+                start = pos + (strlen(rpl) - url_len);
 
                 free(url);
                 free(rpl);
