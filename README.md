@@ -1,5 +1,6 @@
 # txt2web
-A simple static site generator for creating a blog.
+A simple static site generator for creating a blog. See it in action here: https://blog.masonarmand.com/
+
 This simple c program turns a directory of plaintext files into a full html website.
 The only dependencies are the C standard library and POSIX functions.
 Here is the syntax for creating a blog post (txt file):
