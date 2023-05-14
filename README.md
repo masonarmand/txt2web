@@ -36,7 +36,6 @@ replacing `<build_directory>` with the directory that the website will generate 
 
 ## Todo
 - Add formatting for:
-  - links
   - lists
   - inline code blocks (one backtick)
 - References using `[number]` with bibliography at the end of the page?
