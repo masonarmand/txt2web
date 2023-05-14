@@ -220,9 +220,11 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         int header_level = str_starts_with_count(line, '#');
                         char* str = str_get_value_after_token(line, "#");
                         char* rpl = str_repl_keywords(str, blog_post);
-                        fprintf(f_out, "  <h%d>%s</h%d>\n", header_level, rpl, header_level);
+                        char* link_rpl = replace_links(rpl);
+                        fprintf(f_out, "  <h%d>%s</h%d>\n", header_level, link_rpl, header_level);
                         free(str);
                         free(rpl);
+                        free(link_rpl);
                 }
                 else if (str_starts_with(line, "```")) {
                         if (in_paragraph)
@@ -238,9 +240,11 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                 }
                 else if (!in_paragraph && strlen(line) > 1) {
                         char* str = str_repl_keywords(line, blog_post);
-                        fprintf(f_out, "\n  <p>\n    %s", str);
+                        char* rpl = replace_links(str);
+                        fprintf(f_out, "\n  <p>\n    %s", rpl);
                         in_paragraph = true;
                         free(str);
+                        free(rpl);
                 }
                 else {
                         char* str = str_repl_keywords(line, blog_post);
@@ -498,10 +502,10 @@ char* replace_links(char* str)
                 char* rpl;
                 char* url;
                 char* new_str;
-                size_t pos_offset = pos - start;
 
                 while (*end && !isspace(*end))
                         end++;
+
                 url_len = end - pos;
                 url = malloc(url_len + 1);
 
@@ -510,7 +514,7 @@ char* replace_links(char* str)
 
                 strncpy(url, pos, url_len);
                 url[url_len] = '\0';
-                rpl_len = strlen("<a href=''></a>") + 2 * url_len + 1;
+                rpl_len = strlen("<a href=''></a>") + (2 * url_len) + 1;
                 rpl = malloc(rpl_len);
 
                 if (!rpl)
@@ -522,9 +526,10 @@ char* replace_links(char* str)
                 free(cpy);
                 cpy = new_str;
 
+                start = pos + (strlen(rpl) - url_len);
+
                 free(url);
                 free(rpl);
-                start = cpy + pos_offset + rpl_len;
         }
         return cpy;
 }
