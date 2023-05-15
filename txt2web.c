@@ -526,12 +526,12 @@ int str_starts_with_count(const char* str, const char prefix)
         bool last_valid = true;
 
         for (i = 0; i < strlen(str); i++) {
-                if (last_valid && str[i] == prefix) {
-                        count++;
-                        last_valid = true;
-                }
                 if (!last_valid) {
                         break;
+                }
+                if (str[i] == prefix) {
+                        count++;
+                        last_valid = true;
                 }
         }
 
