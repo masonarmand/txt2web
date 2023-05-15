@@ -308,10 +308,7 @@ void free_post(Post* post)
 
 bool hasperms(const char* dir)
 {
-        if (access(dir, R_OK | W_OK) == 0)
-                return true;
-        else
-                return false;
+        return (access(dir, R_OK | W_OK) == 0);
 }
 
 
@@ -436,9 +433,6 @@ void remove_extension(const char* filename, char* output)
                 strncpy(output, filename, dot - filename);
                 output[dot - filename] = '\0';
         }
-        else {
-                return;
-        }
 }
 
 
@@ -452,13 +446,11 @@ char* replace_str(char* str, const char* find, const char* replace)
         int len_front; /* distance between ins and end of the last match */
         int count;
 
-        if (!str || !find)
+        if (!str || !find || !replace)
                 return NULL;
         len_find = strlen(find);
         if (len_find == 0)
                 return NULL;
-        if (!replace)
-                replace = "";
         len_replace = strlen(replace);
 
         /* count number of needed replacements */
