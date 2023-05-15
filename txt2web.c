@@ -4,7 +4,7 @@
  * Original Author: Mason Armand
  * Contributors:
  * Date Created: May 10, 2023
- * Last Modified: May 11, 2023
+ * Last Modified: May 13, 2023
  */
 #include <ctype.h>
 #include <dirent.h>
