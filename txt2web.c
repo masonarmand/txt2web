@@ -206,7 +206,11 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                                 in_code = false;
                         }
                         else {
-                                fprintf(f_out, "%s", line);
+                                char* rpl_less = replace_str(line, "<", "&lt;");
+                                char* rpl_greater = replace_str(rpl_less, ">", "&gt;");
+                                fprintf(f_out, "%s", rpl_greater);
+                                free(rpl_less);
+                                free(rpl_greater);
                         }
                 }
                 /* Images */
