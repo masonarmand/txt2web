@@ -242,7 +242,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                         fprintf(f_out, "  </p>\n");
                         in_paragraph = false;
                 }
-                else if (!in_paragraph && strlen(line) > 1) {
+                else if (!in_paragraph && strlen(line) > 1 && strstr(line, "<") == NULL) {
                         char* str = str_repl_keywords(line, blog_post);
                         char* rpl = replace_links(str);
                         fprintf(f_out, "\n  <p>\n    %s", rpl);
