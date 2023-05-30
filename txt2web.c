@@ -59,8 +59,18 @@ int main(int argc, char **argv)
         char postdir[512];
         char indexloc[512];
 
-        if (argc != 2) {
-                fprintf(stderr, "Usage: %s destination_directory\n", argv[0]);
+        if (argc == 3) {
+                if (strstr(argv[1], ".txt") == NULL) {
+                        fprintf(stderr, "Usage: %s <input text file> <output file>\n", argv[0]);
+                        return 0;
+                }
+
+                printf("Processing %s\n", argv[1]);
+                txt_to_html(argv[1], argv[2]);
+                return 0;
+        }
+        else if (argc != 2) {
+                fprintf(stderr, "Usage: %s <destination_directory>\n", argv[0]);
                 return 0;
         }
 
