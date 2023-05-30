@@ -226,6 +226,10 @@ Post txt_to_html(const char* input_filename, const char* output_filename, bool a
                 /* Images */
                 else if (str_starts_with(line, "@")) {
                         char* str_img = str_get_value(line, "@");
+                        if (in_paragraph) {
+                                in_paragraph = false;
+                                fprintf(f_out, "  </p>\n");
+                        }
                         fprintf(f_out, "  <img src='%s'>\n", str_img);
                         free(str_img);
                 }
@@ -235,6 +239,10 @@ Post txt_to_html(const char* input_filename, const char* output_filename, bool a
                         char* str = str_get_value_after_token(line, "#");
                         char* rpl = str_repl_keywords(str, blog_post);
                         char* link_rpl = replace_links(rpl);
+                        if (in_paragraph) {
+                                in_paragraph = false;
+                                fprintf(f_out, "  </p>\n");
+                        }
                         fprintf(f_out, "  <h%d>%s</h%d>\n", header_level, link_rpl, header_level);
                         free(str);
                         free(rpl);
