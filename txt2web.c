@@ -24,7 +24,7 @@ typedef struct {
         time_t date;
 } Post;
 
-Post txt_to_html(const char* input_filename, const char* output_filename);
+Post txt_to_html(const char* input_filename, const char* output_filename, bool add_link);
 bool direxists(const char* dir);
 void cleandirname(char* str);
 void free_post(Post* post);
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
                 }
 
                 printf("Processing %s\n", argv[1]);
-                txt_to_html(argv[1], argv[2]);
+                txt_to_html(argv[1], argv[2], false);
                 return 0;
         }
         else if (argc != 2) {
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
                 remove_extension(ent->d_name, new_filename);
 
                 sprintf(output_file, "%s%s.html", postdir, new_filename);
-                files[file_count] = txt_to_html(ent->d_name, output_file);
+                files[file_count] = txt_to_html(ent->d_name, output_file, true);
                 files[file_count].filename = strdup(new_filename);
                 file_count++;
         }
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 
         /* process index file */
         printf("Processing index.html\n");
-        index_post = txt_to_html("index", indexloc);
+        index_post = txt_to_html("index", indexloc, false);
 
         index = fopen(indexloc, "r+");
         if (index == NULL) {
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 }
 
 
-Post txt_to_html(const char* input_filename, const char* output_filename)
+Post txt_to_html(const char* input_filename, const char* output_filename, bool add_link)
 {
         FILE* f_in = fopen(input_filename, "r");
         FILE* f_out = fopen(output_filename, "w");
@@ -179,7 +179,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename)
                 else if (str_starts_with(line, "-----") && !in_code) {
                         in_meta = false;
                         fprintf(f_out, "\n</head>\n<body>\n<main>\n");
-                        if (strcmp(input_filename, "index") != 0) {
+                        if (add_link) {
                                 fprintf(f_out, "<a href='/'>&lt;-- go to home page</a><br><br>");
                         }
                         continue;
