@@ -431,6 +431,8 @@ void parse_date(const char* date_str, time_t* result)
         struct tm tm_date = { 0 };
         strptime(date_str, "%b %d %Y", &tm_date);
         *result = mktime(&tm_date);
+        printf("%s\n", date_str);
+        print_date(result);
 }
 
 
@@ -566,12 +568,13 @@ bool str_starts_with(const char* str, const char* prefix)
 void clean_str(char* str)
 {
         /* find first non-whitespace char */
-         while(isspace((unsigned char)*str)) str++;
+        char* first_non_space = str;
+        while(isspace((unsigned char)*first_non_space)) first_non_space++;
 
-         /* create new string without the leading whitespace */
-         memmove(str, str, strlen(str) + 1);
+        /* create new string without the leading whitespace */
+        memmove(str, first_non_space, strlen(first_non_space) + 1);
 
-         str[strcspn(str, "\n")] = 0; /* remove newline */
+        str[strcspn(str, "\n")] = 0; /* remove newline */
 }
 
 
