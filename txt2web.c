@@ -431,8 +431,6 @@ void parse_date(const char* date_str, time_t* result)
         struct tm tm_date = { 0 };
         strptime(date_str, "%b %d %Y", &tm_date);
         *result = mktime(&tm_date);
-        printf("%s\n", date_str);
-        print_date(result);
 }
 
 
