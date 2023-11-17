@@ -260,7 +260,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename, bool a
                         fprintf(f_out, "  </p>\n");
                         in_paragraph = false;
                 }
-                else if (!in_paragraph && strlen(line) > 1 && strstr(line, "<") == NULL) {
+                else if (!in_paragraph && strlen(line) > 1 && (strstr(line, "<") == NULL || strstr(line, "<a"))) {
                         char* str = str_repl_keywords(line, blog_post);
                         char* rpl = replace_links(str);
                         fprintf(f_out, "\n  <p>\n    %s", rpl);
@@ -354,8 +354,9 @@ void copy_dir(const char* src, char* dest)
                 bool is_dest = strcmp(entry->d_name, dest) == 0;
                 bool is_sh = strstr(entry->d_name, ".sh") != NULL;
                 bool is_txt = strstr(entry->d_name, ".txt") != NULL;
+                bool is_git = strstr(entry->d_name, ".git") != NULL;
 
-                if (is_dir || is_pdir || is_index || is_dest || is_sh || is_txt)
+                if (is_dir || is_pdir || is_index || is_dest || is_sh || is_txt || is_git)
                         continue;
 
                 snprintf(src_path, sizeof(src_path), "%s/%s", src, entry->d_name);
@@ -504,11 +505,24 @@ char* replace_links(const char* str)
         const char* https = "https://";
         const char* start = str;
         const char* pos = NULL;
-        char* result = malloc(strlen(str) * 3 + strlen("<a href=''></a>") + 1);
-        char* result_pos = result;
+        char* result;
+        char* result_pos;
+
+        if (strstr(str, "<a href")) {
+                result = malloc(strlen(str) + 1);
+                if (result) {
+                        strcpy(result, str);
+                        return result;
+                }
+                return NULL;
+        }
+
+        result = malloc(strlen(str) * 3 + strlen("<a href=''></a>") + 1);
+        result_pos = result;
 
         if (!result)
                 return NULL;
+
 
         while ((pos = strstr(start, http)) || (pos = strstr(start, https))) {
                 const char* end = pos;
