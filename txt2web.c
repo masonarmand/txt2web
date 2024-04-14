@@ -93,7 +93,7 @@ int main(int argc, char **argv)
         mkdir(argv[1], 0755);
         mkdir(postdir, 0755);
 
-        if ((dir = opendir(".")) == NULL) {
+        if ((dir = opendir("./posts/")) == NULL) {
                 fprintf(stderr, "Could not open directory");
                 return 1;
         }
@@ -101,6 +101,7 @@ int main(int argc, char **argv)
         while ((ent = readdir(dir)) != NULL) {
                 char new_filename[273];
                 char output_file[789];
+                char input_filename[273];
 
                 if (strstr(ent->d_name, ".txt") == NULL)
                         continue;
@@ -109,7 +110,8 @@ int main(int argc, char **argv)
                 remove_extension(ent->d_name, new_filename);
 
                 sprintf(output_file, "%s%s.html", postdir, new_filename);
-                files[file_count] = txt_to_html(ent->d_name, output_file, true);
+                sprintf(input_filename, "./posts/%s", ent->d_name);
+                files[file_count] = txt_to_html(input_filename, output_file, true);
                 files[file_count].filename = strdup(new_filename);
                 file_count++;
         }
@@ -162,7 +164,7 @@ Post txt_to_html(const char* input_filename, const char* output_filename, bool a
         Post blog_post = { 0 };
 
         if (f_in == NULL) {
-                fprintf(stderr, "ERROR: Trying to write to nonexistent file: %s", input_filename);
+                fprintf(stderr, "ERROR: Trying to read from nonexistent file: %s", input_filename);
                 exit(1);
         }
 
