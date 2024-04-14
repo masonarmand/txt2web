@@ -33,6 +33,7 @@ Also, you need to create a file called `index` with the same format as above to 
 To generate your website simply enter this command
 `txt2web <build_directory>`
 replacing `<build_directory>` with the directory that the website will generate to. Please note, that the build directory will be cleared before building the site, so do not make the mistake of making the build directory the same as the source directory.
+Also ensure that your text files are placed in a posts/ directory.
 
 ## Todo
 - Add formatting for:
